@@ -7,7 +7,7 @@
       <div class="window">
         <!--  -->
         <div class="container">
-          <Gift
+          <GiftComponent
             v-for="(config, index) in configs"
             @finished="isFinished"
             :trigger="trigger"
@@ -15,50 +15,50 @@
             :key="index"
             ref="gift"
           >
-          </Gift>
+          </GiftComponent>
           <div class="fence1"></div>
           <div class="fence2"></div>
           <div class="fence3"></div>
         </div>
         <!--  -->
       </div>
-      <div :class="['handler', { active: active }, { disabled: disabled }]">
-        <div class="stick2"></div>
-        <div class="stick"></div>
-        <div class="ball" @click="!disabled && turn()"></div>
-      </div>
     </div>
-    <div class="history" @click="openResultList = true">OPEN RESULT</div>
-    <div
-      @click.self="openResultList = false"
-      :class="['resultList', { openResultList: openResultList }]"
-    >
-      <div class="resultList-container">
-        <div class="result" v-for="(result, index) in resultList" :key="index">
-          {{ `Round${index + 1}: ${result}` }}
-        </div>
-      </div>
-    </div>
+    <div class="start" @click="active = true && turn()">Bắt đầu</div>
   </div>
 </template>
 
-<script>
-import Gift from "./Gift";
+<script lang="ts">
+import GiftComponent from "./Gift.vue";
 import { defineComponent, ref } from "vue";
-
+import { Gift } from "@/@types";
 export default defineComponent({
   components: {
-    Gift,
+    GiftComponent,
+  },
+  props: {
+    appSetting: {
+      type: Object,
+      required: true,
+    },
   },
   setup() {
-    const trigger = ref(null);
+    const trigger = ref();
     const active = ref(false);
     const disabled = ref(false);
-    const configs = ref([
+    const configs = ref<
+      {
+        style: string;
+        gifts: Gift[];
+        duration: number;
+        fontSize: number;
+        height: number;
+        width: number;
+      }[]
+    >([
       {
         style: "gift-style",
         gifts: Array.from(new Array(10), (val, index) => {
-          return { type: "text", name: index };
+          return { type: "text", name: String(index) };
         }),
         duration: 2000,
         fontSize: 150,
@@ -68,7 +68,7 @@ export default defineComponent({
       {
         style: "gift-style",
         gifts: Array.from(new Array(10), (val, index) => {
-          return { type: "text", name: index };
+          return { type: "text", name: String(index) };
         }),
         duration: 3000,
         fontSize: 150,
@@ -78,7 +78,7 @@ export default defineComponent({
       {
         style: "gift-style",
         gifts: Array.from(new Array(10), (val, index) => {
-          return { type: "text", name: index };
+          return { type: "text", name: String(index) };
         }),
         duration: 4000,
         fontSize: 150,
@@ -88,7 +88,7 @@ export default defineComponent({
       {
         style: "gift-style",
         gifts: Array.from(new Array(10), (val, index) => {
-          return { type: "text", name: index };
+          return { type: "text", name: String(index) };
         }),
         duration: 5000,
         fontSize: 150,
@@ -97,8 +97,8 @@ export default defineComponent({
       },
     ]);
     const openResultList = ref(false);
-    const resultList = ref([]);
-    const result = ref([]);
+    const resultList = ref<string[]>([]);
+    const result = ref("");
     const gift = ref();
     const turn = () => {
       active.value = true;
@@ -109,13 +109,15 @@ export default defineComponent({
       trigger.value = new Date();
     };
 
-    const isFinished = (val) => {
-      result.value.push(val);
+    const isFinished = (val: string) => {
+      const resultTmp = [];
+      resultTmp.push(val);
       disabled.value = false;
+      result.value = resultTmp.join("");
       resultList.value.push(result.value);
-      result.value = [];
+      result.value = "";
       if (!gift.value.isRunning) {
-        console.log('is running', resultList.value);
+        console.log("is running", resultList.value);
       }
     };
     return {
@@ -319,7 +321,7 @@ export default defineComponent({
       color: #fff;
     }
   }
-  .history {
+  .start {
     position: relative;
     display: flex;
     align-items: center;

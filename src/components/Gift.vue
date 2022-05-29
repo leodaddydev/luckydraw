@@ -1,7 +1,7 @@
 <template>
   <div
     :style="giftStyle"
-    :class="['gift-container', displayType, { 'autoTurn': isRunning }]"
+    :class="['gift-container', displayType, { autoTurn: isRunning }]"
     ref="giftContainer"
   >
     <div
@@ -20,8 +20,9 @@
   </div>
 </template>
 
-<script>
-import { computed, defineComponent, ref, watch, watchEffect } from "vue";
+<script lang="ts">
+import { GiftsDeg, Gift } from "@/@types";
+import { computed, defineComponent, ref, watch } from "vue";
 export default defineComponent({
   props: {
     trigger: {
@@ -41,7 +42,7 @@ export default defineComponent({
     const isRunning = ref(false);
     const currentDeg = ref(0);
     const targetDeg = ref(0);
-    const giftsDeg = ref([]);
+    const giftsDeg = ref<GiftsDeg[]>([]);
     const randomRollBackDeg = ref({});
     const giftContainer = ref();
     const giftStyle = ref({});
@@ -71,7 +72,7 @@ export default defineComponent({
     };
 
     const logGiftsDeg = () => {
-      props.config.gifts.forEach((gift, index) => {
+      props.config.gifts.forEach((gift: Gift, index: number) => {
         giftsDeg.value[index] = {
           from: index === 0 ? 0 : giftsDeg.value[index - 1].to,
           to:
@@ -113,7 +114,7 @@ export default defineComponent({
         "--targetDeg": `${targetDeg.value}deg`,
         "--rollBackDeg": `${randomRollBackDeg.value}deg`,
       };
-      
+
       let giftName = null;
       const endDeg = currentDeg.value + rotate.value / 2;
       giftsDeg.value.forEach((gift) => {
@@ -124,14 +125,20 @@ export default defineComponent({
       isRunning.value = false;
       emit("finished", giftName);
     };
-    
-    watch(() => props.config, () => {
-      setting();
-    });
 
-    watch(() => props.trigger, () => {
-      autoTurn();
-    });
+    watch(
+      () => props.config,
+      () => {
+        setting();
+      }
+    );
+
+    watch(
+      () => props.trigger,
+      () => {
+        autoTurn();
+      }
+    );
 
     watch(isRunning, () => {
       if (isRunning.value) {

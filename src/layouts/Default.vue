@@ -1,21 +1,6 @@
 <template>
+  <AppDrawer :toggle="visible" @callbackSettings="handleSettings" />
   <a-layout id="components-layout">
-    <a-drawer
-      v-model:visible="visible"
-      title="Basic Drawer"
-      placement="right"
-      ref="appDrawer"
-      width="400px"
-    >
-      <a-affix
-        :offset-top="120"
-        :style="{ position: 'absolute', right: '400px' }"
-      >
-        <a-button type="primary" @click="showDrawer">
-          <setting-outlined />
-        </a-button>
-      </a-affix>
-    </a-drawer>
     <a-layout>
       <a-layout-content>
         <a-affix
@@ -26,7 +11,7 @@
             <setting-outlined />
           </a-button>
         </a-affix>
-        <router-view />
+        <slot-machine :appSetting="appSetting" />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -34,23 +19,38 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { SettingOutlined } from "@ant-design/icons-vue";
-
+import AppDrawer from "@/components/AppDrawer.vue";
+import SlotMachine from "@/components/SlotMachine.vue";
 export default defineComponent({
   components: {
     SettingOutlined,
+    AppDrawer,
+    SlotMachine,
   },
   setup() {
     const visible = ref<boolean>(false);
     const appDrawer = ref();
 
+    const appSetting = ref({
+      prizes: {},
+      players: [],
+    });
+
     const showDrawer = () => {
       visible.value = !visible.value;
     };
 
+    const handleSettings = (prizes: []) => {
+      console.log(prizes);
+      appSetting.value.prizes = prizes;
+    };
+
     return {
+      appSetting,
       visible,
       appDrawer,
       showDrawer,
+      handleSettings,
     };
   },
 });
